@@ -1,5 +1,5 @@
 ---
-title: 搭建服务器
+title: 搭建服务器（基于 centos7.0 系统）
 date: 2024-04-29 10:03
 categories:
   - 学习
@@ -26,15 +26,15 @@ categories:
 卸载旧版本docker：
 如果存在旧版docker可以执行以下命令卸载，没有则跳过。
 sudo yum remove docker \
-                  docker-client \
-                  docker-client-latest \
-                  docker-common \
-                  docker-latest \
-                  docker-latest-logrotate \
-                  docker-logrotate \
-                  docker-selinux \
-                  docker-engine-selinux \
-                  docker-engine
+          docker-client \
+          docker-client-latest \
+          docker-common \
+          docker-latest \
+          docker-latest-logrotate \
+          docker-logrotate \
+          docker-selinux \
+          docker-engine-selinux \
+          docker-engine
 
 安装必要的依赖包：
 yum install -y yum-utils device-mapper-persistent-data lvm2
@@ -72,10 +72,11 @@ systemctl status docker
 查看gcc版本：gcc -v
 没有则需要安装gcc：yum install gcc -y
 解压nginx：tar -zvxf nginx-1.21.6.tar.gz
+进入nginx目录：cd nginx-1.21.6
 安装nginx：
-./configure --prefix=/usr/local/nginx --with-http_stub_status_module --with-http_ssl_module
+./configure --prefix=/home/nginx --with-http_stub_status_module --with-http_ssl_module
 make
-make install
+make install .
 nginx默认安装在：/usr/local/nginx
 启动nginx：/usr/local/nginx/sbin/nginx
 ```
@@ -91,10 +92,10 @@ mkdir -p /home/pumpkin/mysql/logs
 
 docker run -id \
 --name mysql \
--p 3306:3306 \
--v /home/pumpkin/mysql/conf:/etc/mysql/conf.d \
--v /home/pumpkin/mysql/data:/var/lib/mysql \
--v /home/pumpkin/mysql/logs:/logs \
+-p 60001:3306 \
+-v /home/cmz/mysql/conf:/etc/mysql/conf.d \
+-v /home/cmz/mysql/data2:/var/lib/mysql \
+-v /home/cmz/mysql/logs:/logs \
 -e MYSQL_ROOT_PASSWORD=123456 mysql:latest
 
 开放mysql远程访问：
@@ -120,10 +121,15 @@ mkdir -p /home/pumpkin/redis/data
 docker run -d \
 --name redis \
 --restart=always \
--p 6379:6379 \
--v /home/pumpkin/redis/conf/redis.conf:/etc/redis/redis.conf \
--v /home/pumpkin/redis/data:/data \
---appendonly yes redis-server
+-p 60002:6379 \
+-v /home/cmz/redis/conf/redis.conf:/etc/redis/redis.conf \
+-v /home/cmz/redis/data:/data \
+redis
+```
+
+拉取失败可以指定镜像仓库
+```shell
+docker pull docker.1ms.run/redislabs/redis:latest
 ```
 
 ### nacos：
@@ -335,7 +341,7 @@ runlike -p redis
 docker pull rabbitmq:management
 
 // 启动RabbitMQ，默认guest用户，密码也是guest。
-docker run --name rabbit --restart=always -p 5672:5672  -d  rabbitmq:management   
+docker run --name rabbit --restart=always -p 60003:5672  -d  rabbitmq:management   
 ```
 
 ### elasticsearch
